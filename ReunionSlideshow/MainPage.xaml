@@ -12,13 +12,26 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="5*"></ColumnDefinition>
+                <ColumnDefinition Width="0.5*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Visibility="{x:Bind ViewModel.ControlPanelVisibility}">
-                <Button Content="Set Image Folder" Command="{x:Bind ViewModel.SetImageFolderCommand}"/>
-                <Button Content="Start Slideshow" Command="{x:Bind ViewModel.StartSlideShowCommand}"/>
-                <Button Content="Next Image" Command="{x:Bind ViewModel.NextImageCommand}"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Column="0" Visibility="{x:Bind ViewModel.ControlPanelVisibility, Mode=OneWay}">
+            <Button Content="Set Image Folder" Command="{x:Bind ViewModel.SetImageFolderCommand}" HorizontalAlignment="Stretch"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" >
+                <TextBlock VerticalAlignment="Center" Text="Start Image "></TextBlock>
+                <TextBox Text="{x:Bind ViewModel.StartImage, Mode=TwoWay}"></TextBox>
             </StackPanel>
-            <Image Grid.Column="1" DataContext="{x:Bind ViewModel.ViewImage}"></Image>
+            <Button Content="Start Slideshow" Command="{x:Bind ViewModel.StartSlideShowCommand}" HorizontalAlignment="Stretch"/>
+            <Button Content="Next Image" Command="{x:Bind ViewModel.NextImageCommand}" HorizontalAlignment="Stretch"/>
+            </StackPanel>
+            <Image Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="4" Source="{x:Bind ViewModel.ViewImage, Mode=OneWay}" Stretch="UniformToFill"></Image>
+            <TextBlock Grid.Column="2" Grid.Row="2" Text="{x:Bind ViewModel.CurrentImage, Mode=OneWay}"></TextBlock>
+            <TextBlock Grid.Column="2" Grid.Row="3" Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}"></TextBlock>
         </Grid>
     </Grid>
 </Page>
