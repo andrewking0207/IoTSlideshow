@@ -51,8 +51,10 @@ namespace ReunionSlideshow
         private void InitializeCommands()
         {
             SetImageFolderCommand = InitializeSetImageFolderCommand();
-            StartSlideShowCommand = InititializeStartSlideshowCommand();
+            StartSlideshowCommand = InititializeStartSlideshowCommand();
             NextImageCommand = InitializeNextImageCommand();
+            PauseSlideshowCommand = InitializePauseSlideshowCommand();
+            PreviousImageCommand = InitializePreviousImageCommand();
         }
 
         private DelegateCommand InitializeSetImageFolderCommand()
@@ -82,16 +84,45 @@ namespace ReunionSlideshow
             });
         }
 
+        private DelegateCommand InitializePauseSlideshowCommand()
+        {
+            return new DelegateCommand(() =>
+            {
+                if (_timer.IsEnabled)
+                {
+                    _timer.Stop();
+                    ControlPanelVisibility = Visibility.Visible;
+                }
+                else
+                {
+                    _timer.Start();
+                    ControlPanelVisibility = Visibility.Collapsed;
+                }
+            });
+        }
         private DelegateCommand InitializeNextImageCommand()
         {
             return new DelegateCommand(async () =>
             {
-                if (_currentImage < _imageCount)
+                if (_currentImage < _imageCount - 1)
                     CurrentImage = _currentImage + 1;
+                else
+                    CurrentImage = 0;
                 ViewImage = await StorageFileToImage(_files[_currentImage]);
             });
         }
 
+        private DelegateCommand InitializePreviousImageCommand()
+        {
+            return new DelegateCommand(async () =>
+            {
+                if (_currentImage > 0)
+                    CurrentImage = _currentImage - 1;
+                else
+                    CurrentImage = _imageCount;
+                ViewImage = await StorageFileToImage(_files[_currentImage]);
+            });
+        }
         #region Bindable 
 
         private Visibility _controlPanelVisibility;
@@ -103,6 +134,7 @@ namespace ReunionSlideshow
                 SetProperty(ref _controlPanelVisibility, value);
             }
         }
+
         private BitmapImage _viewImage;
         public BitmapImage ViewImage { get { return _viewImage ?? new BitmapImage(); } set { SetProperty(ref _viewImage, value); } }
 
@@ -113,23 +145,40 @@ namespace ReunionSlideshow
         public int ImageCount { get { return _imageCount; } set { SetProperty(ref _imageCount, value); } }
 
         private int _currentImage;
-        public int CurrentImage { get { return _currentImage;} set { SetProperty(ref _currentImage, value); } }
 
-        public int StartImage { get; set; }
+        public int CurrentImage
+        {
+            get
+            {
+                return _currentImage;
+            }
+            set
+            {
+                SetProperty(ref _currentImage, value);
+                _startImage = value;
+                OnPropertyChanged(nameof(StartImage));
+            }
+        }
 
+        private int _startImage;
+        public int StartImage { get {return _startImage;} set { SetProperty(ref _startImage, value); } }
+        public DelegateCommand PauseSlideshowCommand { get; set; }
         public DelegateCommand SetImageFolderCommand { get; set; }
-        public DelegateCommand StartSlideShowCommand { get; set; }
+        public DelegateCommand StartSlideshowCommand { get; set; }
         public DelegateCommand NextImageCommand { get; set; }
+        public DelegateCommand PreviousImageCommand { get; set; }
         #endregion
 
         private async void TimedImage(object sender, object e)
         {
-            if (_currentImage < _imageCount)
-                CurrentImage = _currentImage + 1;
-            ViewImage = await StorageFileToImage(_files[_currentImage]);
+            if (CurrentImage < ImageCount - 1)
+                CurrentImage = CurrentImage + 1;
+            else
+                CurrentImage = 0;
+            ViewImage = await StorageFileToImage(_files[CurrentImage]);
         }
 
-        public static async Task<BitmapImage> StorageFileToImage(StorageFile savedStorageFile)
+        private static async Task<BitmapImage> StorageFileToImage(StorageFile savedStorageFile)
         {
             using (var fileStream = await savedStorageFile.OpenAsync(Windows.Storage.FileAccessMode.Read))
             {
@@ -140,5 +189,7 @@ namespace ReunionSlideshow
                 return bitmapImage;
             }
         }
+
+
     }
 }
