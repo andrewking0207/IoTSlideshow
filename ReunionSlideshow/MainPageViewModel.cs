@@ -63,9 +63,8 @@ namespace ReunionSlideshow
                 fp.FileTypeFilter.Add(".jpg");
                 fp.FileTypeFilter.Add(".bmp");
                 fp.FileTypeFilter.Add(".png");
-              
+                fp.FileTypeFilter.Add(".gif");
                 _imageFolder = await fp.PickSingleFolderAsync();
-
                 var fileQuery = new QueryOptions() {FolderDepth = FolderDepth.Deep};
                 _files = await _imageFolder.CreateFileQueryWithOptions(fileQuery).GetFilesAsync();
                 ImageCount = _files.Count();
