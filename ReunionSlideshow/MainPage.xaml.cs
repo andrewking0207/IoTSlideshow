@@ -25,6 +25,9 @@ namespace ReunionSlideshow
         public MainPage()
         {
             this.InitializeComponent();
+            this.ViewModel = new MainPageViewModel();
         }
+
+        public MainPageViewModel ViewModel { get; set; }
     }
 }

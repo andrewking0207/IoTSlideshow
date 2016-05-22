@@ -8,6 +8,17 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="5*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Visibility="{x:Bind ViewModel.ControlPanelVisibility}">
+                <Button Content="Set Image Folder" Command="{x:Bind ViewModel.SetImageFolderCommand}"/>
+                <Button Content="Start Slideshow" Command="{x:Bind ViewModel.StartSlideShowCommand}"/>
+                <Button Content="Next Image" Command="{x:Bind ViewModel.NextImageCommand}"/>
+            </StackPanel>
+            <Image Grid.Column="1" DataContext="{x:Bind ViewModel.ViewImage}"></Image>
+        </Grid>
     </Grid>
 </Page>
