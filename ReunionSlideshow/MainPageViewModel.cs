@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -8,6 +9,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Search;
 using Windows.Storage.Streams;
+using Windows.UI.Text.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
@@ -19,14 +21,17 @@ namespace ReunionSlideshow
     public class MainPageViewModel : BindableBase
     {
         private StorageFolder _imageFolder;
-        private IReadOnlyList<StorageFile> _files;
+        private List<StorageFile> _files;
         private DispatcherTimer _timer;
+        private LocalStorage _localStorage;
 
         public MainPageViewModel()
         {
             InitializeCommands();
             InitializeTimer();
             ControlPanelVisibility = Visibility.Visible;
+            _localStorage = new LocalStorage();
+            ResumeSessionVisibility = _localStorage.ReadImageCount() != 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void InitializeTimer()
@@ -55,6 +60,7 @@ namespace ReunionSlideshow
             NextImageCommand = InitializeNextImageCommand();
             PauseSlideshowCommand = InitializePauseSlideshowCommand();
             PreviousImageCommand = InitializePreviousImageCommand();
+            ResumeLastSessionCommand = InitializeResumeLastSessionCommand();
         }
 
         private DelegateCommand InitializeSetImageFolderCommand()
@@ -67,12 +73,48 @@ namespace ReunionSlideshow
                 fp.FileTypeFilter.Add(".png");
                 fp.FileTypeFilter.Add(".gif");
                 _imageFolder = await fp.PickSingleFolderAsync();
-                var fileQuery = new QueryOptions() {FolderDepth = FolderDepth.Deep};
-                _files = await _imageFolder.CreateFileQueryWithOptions(fileQuery).GetFilesAsync();
-                ImageCount = _files.Count();
+                if (_imageFolder != null)
+                {
+                    _localStorage.WriteStorageFolderPath(_imageFolder.Path);
+                    var fileQuery = new QueryOptions() { FolderDepth = FolderDepth.Deep };
+                    var result = await _imageFolder.CreateFileQueryWithOptions(fileQuery).GetFilesAsync();
+                    _files = result.ToList();
+                    _localStorage.WriteStorageFiles(_files);
+                    ImageCount = _files.Count();
+                    OnPropertyChanged(nameof(StorageFolderControlsVisibility));
+                }
             });
         }
 
+        private DelegateCommand InitializeResumeLastSessionCommand()
+        {
+            return new DelegateCommand(async() =>
+            {
+                FolderPicker fp = new FolderPicker();
+                fp.FileTypeFilter.Add(".jpg");
+                fp.FileTypeFilter.Add(".bmp");
+                fp.FileTypeFilter.Add(".png");
+                fp.FileTypeFilter.Add(".gif");
+                _imageFolder = await fp.PickSingleFolderAsync();
+                _files = new List<StorageFile>();
+                if (_imageFolder != null && _imageFolder.Path == _localStorage.ReadStorageFolderPath())
+                {
+                    CurrentImage = _localStorage.ReadLastImageNumber();
+                    ImageCount = _localStorage.ReadImageCount();
+                    var result = await _imageFolder.CreateFileQueryWithOptions(new QueryOptions() { FolderDepth = FolderDepth.Deep }).GetFilesAsync();
+                    var files = result.ToList();
+                    for (int i = 0; i < ImageCount; i++)
+                    {
+                        var id = _localStorage.ReadFileId(i);
+                        if (id != null)
+                            _files.Add(files.FirstOrDefault(f => f.FolderRelativeId == id));
+                    }
+                    ViewImage = await StorageFileToImage(_files[_currentImage]);
+                }
+                ResumeSessionVisibility = Visibility.Collapsed;
+                OnPropertyChanged(nameof(StorageFolderControlsVisibility)); 
+            });
+        }
         private DelegateCommand InititializeStartSlideshowCommand()
         {
             return new DelegateCommand(async () =>
@@ -105,7 +147,7 @@ namespace ReunionSlideshow
             return new DelegateCommand(async () =>
             {
                 if (_currentImage < _imageCount - 1)
-                    CurrentImage = _currentImage + 1;
+                    CurrentImage = CurrentImage + 1;
                 else
                     CurrentImage = 0;
                 ViewImage = await StorageFileToImage(_files[_currentImage]);
@@ -117,10 +159,11 @@ namespace ReunionSlideshow
             return new DelegateCommand(async () =>
             {
                 if (_currentImage > 0)
-                    CurrentImage = _currentImage - 1;
+                    CurrentImage = CurrentImage - 1;
                 else
                     CurrentImage = _imageCount;
                 ViewImage = await StorageFileToImage(_files[_currentImage]);
+                OnPropertyChanged(nameof(ViewImage));
             });
         }
         #region Bindable 
@@ -135,11 +178,14 @@ namespace ReunionSlideshow
             }
         }
 
+        public Visibility StorageFolderControlsVisibility => _imageFolder != null ? Visibility.Visible : Visibility.Collapsed;
+
+        private Visibility _resumeSessionVisibility;
+        public Visibility ResumeSessionVisibility { get { return _resumeSessionVisibility; } set { SetProperty(ref _resumeSessionVisibility, value); } }
+
+
         private BitmapImage _viewImage;
         public BitmapImage ViewImage { get { return _viewImage ?? new BitmapImage(); } set { SetProperty(ref _viewImage, value); } }
-
-        private string _imagePath;
-        public string ImagePath { get { return _imagePath; } set { SetProperty(ref _imagePath, value); } }
 
         private int _imageCount;
         public int ImageCount { get { return _imageCount; } set { SetProperty(ref _imageCount, value); } }
@@ -156,6 +202,7 @@ namespace ReunionSlideshow
             {
                 SetProperty(ref _currentImage, value);
                 _startImage = value;
+                _localStorage.WriteLastImageNumber(value);
                 OnPropertyChanged(nameof(StartImage));
             }
         }
@@ -167,6 +214,7 @@ namespace ReunionSlideshow
         public DelegateCommand StartSlideshowCommand { get; set; }
         public DelegateCommand NextImageCommand { get; set; }
         public DelegateCommand PreviousImageCommand { get; set; }
+        public DelegateCommand ResumeLastSessionCommand { get; set; }
         #endregion
 
         private async void TimedImage(object sender, object e)

@@ -21,17 +21,19 @@
                 <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
             <StackPanel Grid.Column="0" Canvas.ZIndex="99" Visibility="{x:Bind ViewModel.ControlPanelVisibility, Mode=OneWay}">
+            <Button Content="Resume Last Session" Command="{x:Bind ViewModel.ResumeLastSessionCommand}" Visibility="{x:Bind ViewModel.ResumeSessionVisibility}" HorizontalAlignment="Stretch"/>
             <Button Content="Set Image Folder" Command="{x:Bind ViewModel.SetImageFolderCommand}" HorizontalAlignment="Stretch"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" >
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Visibility="{x:Bind ViewModel.StorageFolderControlsVisibility, Mode=OneWay}">
                     <Button Content="Start Slideshow" Command="{x:Bind ViewModel.StartSlideshowCommand}" HorizontalAlignment="Stretch"/>
                     <TextBox Text="{x:Bind ViewModel.StartImage, Mode=TwoWay}"></TextBox>
             </StackPanel>
-            
-            <Button Content="Next Image" Command="{x:Bind ViewModel.NextImageCommand}" HorizontalAlignment="Stretch"/>
-                <Button Content="Previous Image" Command="{x:Bind ViewModel.PreviousImageCommand}" HorizontalAlignment="Stretch"></Button>
+
+                <Button Content="Next Image" Command="{x:Bind ViewModel.NextImageCommand}" HorizontalAlignment="Stretch" Visibility="{x:Bind ViewModel.StorageFolderControlsVisibility, Mode=OneWay}"/>
+                <Button Content="Previous Image" Command="{x:Bind ViewModel.PreviousImageCommand}" HorizontalAlignment="Stretch" Visibility="{x:Bind ViewModel.StorageFolderControlsVisibility, Mode=OneWay}"/>
             </StackPanel>
-            <Button Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="4" Command="{x:Bind ViewModel.PauseSlideshowCommand}">
-                <Image Source="{x:Bind ViewModel.ViewImage, Mode=OneWay}" Stretch="UniformToFill"></Image>
+            <Button Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="4"  HorizontalAlignment="Center" Command="{x:Bind ViewModel.PauseSlideshowCommand}">
+                <Image Source="{x:Bind ViewModel.ViewImage, Mode=OneWay}" Stretch="Uniform"></Image>
             </Button>
             <TextBlock Grid.Column="2" Grid.Row="2" Text="{x:Bind ViewModel.CurrentImage, Mode=OneWay}"></TextBlock>
             <TextBlock Grid.Column="2" Grid.Row="3" Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}"></TextBlock>
