@@ -80,7 +80,7 @@ namespace ReunionSlideshow
                     var result = await _imageFolder.CreateFileQueryWithOptions(fileQuery).GetFilesAsync();
                     _files = result.ToList();
                     _localStorage.WriteStorageFiles(_files);
-                    ImageCount = _files.Count();
+                    ImageCount = _files.Count() - 1;
                     OnPropertyChanged(nameof(StorageFolderControlsVisibility));
                 }
             });
@@ -99,8 +99,9 @@ namespace ReunionSlideshow
                 _files = new List<StorageFile>();
                 if (_imageFolder != null && _imageFolder.Path == _localStorage.ReadStorageFolderPath())
                 {
-                    CurrentImage = _localStorage.ReadLastImageNumber();
                     ImageCount = _localStorage.ReadImageCount();
+                    CurrentImage = _localStorage.ReadLastImageNumber();
+
                     var result = await _imageFolder.CreateFileQueryWithOptions(new QueryOptions() { FolderDepth = FolderDepth.Deep }).GetFilesAsync();
                     var files = result.ToList();
                     for (int i = 0; i < ImageCount; i++)
@@ -178,7 +179,7 @@ namespace ReunionSlideshow
             }
         }
 
-        public Visibility StorageFolderControlsVisibility => _imageFolder != null ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility StorageFolderControlsVisibility => _files != null && _files.Any() ? Visibility.Visible : Visibility.Collapsed;
 
         private Visibility _resumeSessionVisibility;
         public Visibility ResumeSessionVisibility { get { return _resumeSessionVisibility; } set { SetProperty(ref _resumeSessionVisibility, value); } }

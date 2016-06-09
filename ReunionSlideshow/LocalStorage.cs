@@ -28,7 +28,9 @@ namespace ReunionSlideshow
 
         public int ReadImageCount()
         {
-            return int.Parse(_localSettings.Values["ImageCount"].ToString());
+            if (_localSettings.Values.ContainsKey("ImageCount"))
+                return int.Parse(_localSettings.Values["ImageCount"].ToString());
+            return 0;
         }
 
         public void WriteStorageFolderPath(string folderPath)
@@ -38,7 +40,9 @@ namespace ReunionSlideshow
 
         public string ReadStorageFolderPath()
         {
-            return _localSettings.Values["FolderPath"].ToString();
+            if (_localSettings.Values.ContainsKey("FolderPath"))
+                return _localSettings.Values["FolderPath"].ToString();
+            return string.Empty;
         }
 
         public void WriteStorageFiles(IReadOnlyList<StorageFile> storageFiles)
@@ -52,7 +56,9 @@ namespace ReunionSlideshow
 
         public string ReadFileId(int imageIndex)
         {
-            return _localSettings.Values[imageIndex.ToString()].ToString();
+            if (_localSettings.Values.ContainsKey(imageIndex.ToString()))
+                return _localSettings.Values[imageIndex.ToString()].ToString();
+            return string.Empty;
         }
     }
 }

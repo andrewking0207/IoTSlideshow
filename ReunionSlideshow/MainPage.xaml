@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
@@ -21,7 +21,7 @@
                 <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
             <StackPanel Grid.Column="0" Canvas.ZIndex="99" Visibility="{x:Bind ViewModel.ControlPanelVisibility, Mode=OneWay}">
-            <Button Content="Resume Last Session" Command="{x:Bind ViewModel.ResumeLastSessionCommand}" Visibility="{x:Bind ViewModel.ResumeSessionVisibility}" HorizontalAlignment="Stretch"/>
+            <Button Content="Resume Last Session" Command="{x:Bind ViewModel.ResumeLastSessionCommand}" Visibility="{x:Bind ViewModel.ResumeSessionVisibility, Mode=OneWay}" HorizontalAlignment="Stretch"/>
             <Button Content="Set Image Folder" Command="{x:Bind ViewModel.SetImageFolderCommand}" HorizontalAlignment="Stretch"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Visibility="{x:Bind ViewModel.StorageFolderControlsVisibility, Mode=OneWay}">
@@ -35,8 +35,8 @@
             <Button Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="4"  HorizontalAlignment="Center" Command="{x:Bind ViewModel.PauseSlideshowCommand}">
                 <Image Source="{x:Bind ViewModel.ViewImage, Mode=OneWay}" Stretch="Uniform"></Image>
             </Button>
-            <TextBlock Grid.Column="2" Grid.Row="2" Text="{x:Bind ViewModel.CurrentImage, Mode=OneWay}"></TextBlock>
-            <TextBlock Grid.Column="2" Grid.Row="3" Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}"></TextBlock>
+            <!--<TextBlock Grid.Column="2" Grid.Row="2" Text="{x:Bind ViewModel.CurrentImage, Mode=OneWay}"></TextBlock>
+            <TextBlock Grid.Column="2" Grid.Row="3" Text="{x:Bind ViewModel.ImageCount, Mode=OneWay}"></TextBlock>-->
         </Grid>
     </Grid>
 </Page>
